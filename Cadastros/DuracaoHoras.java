@@ -4,32 +4,60 @@ public class DuracaoHoras {
 
 	private final Viagem _viagem;
 	private int duracaoHoras;
+
+	private final boolean horaTerminoIgualInicio;
+	private final boolean horaTerminoIgualInicioMaisUm;
+	private final boolean horaTerminoMaiorQueInicio;
+	private final boolean horaTerminoMenorQueInicio;
+	private final boolean minutosTerminoMenorQueInicio;
+	private final int horaTerminoMenosInicio;
 	
 	public DuracaoHoras(Viagem viagem) {
 		_viagem = viagem;
+
+		horaTerminoIgualInicio = _viagem.getHoraTermino() == _viagem.getHoraInicio();
+		horaTerminoIgualInicioMaisUm = _viagem.getHoraTermino() == _viagem.getHoraInicio() + 1;
+		horaTerminoMaiorQueInicio = _viagem.getHoraTermino() > _viagem.getHoraInicio();
+		horaTerminoMenorQueInicio = _viagem.getHoraTermino() < _viagem.getHoraInicio();
+		minutosTerminoMenorQueInicio = _viagem.getMinutosTermino() < _viagem.getMinutoInicio();
+		horaTerminoMenosInicio = viagem.getHoraTermino() - _viagem.getHoraInicio();
 	}
 	
 	public int calcularDuracao() {
-		if (_viagem.getHoraTermino() == _viagem.getHoraInicio())
+		if (horaTerminoIgualInicio)
 			duracaoHoras = 0;
-		if (_viagem.getHoraTermino() > _viagem.getHoraInicio()) //varias possibilidades... 
-			if (_viagem.getHoraTermino() == _viagem.getHoraInicio() + 1) {  
-				if (_viagem.getMinutosTermino() < _viagem.getMinutoInicio())  //nao chegou a uma hora
-					duracaoHoras = 0;
-				else //durou pelo menos uma hora
-					duracaoHoras = 1;
-			} else { //possivelmente ultrapassou duas horas
-				if (_viagem.getHoraTermino() - _viagem.getHoraInicio() > 2) //
-					duracaoHoras = _viagem.getHoraTermino() - _viagem.getHoraInicio();
-				else if (_viagem.getHoraTermino() - _viagem.getHoraInicio() == 2 &&   //certamente menos de duas horas  
-						_viagem.getMinutosTermino() < _viagem.getMinutoInicio())    //e mais de uma hora
-					duracaoHoras = 1;
-				else //duracao de duas horas, certamente
-					duracaoHoras = 2;
-					
-			}
-		if (_viagem.getHoraTermino() < _viagem.getHoraInicio()) 
-			duracaoHoras = -1; //para casos em que a hora de termino nao foi registrada
+		if (horaTerminoMaiorQueInicio)
+			duracaoHoras = calcularDuracaoHoraTerminoMaiorQueInicio();
+		if (horaTerminoMenorQueInicio)
+			duracaoHoras = -1; // Para casos em que a hora de término nao foi registrada
+		return duracaoHoras;
+	}
+
+	private int calcularDuracaoHoraTerminoMaiorQueInicio() {
+		if (horaTerminoIgualInicioMaisUm) {
+			duracaoHoras = calcularDuracaoHoraTerminoIgualInicioMaisUm();
+		} else {
+			duracaoHoras = calcularDuracaoHoraPossivelmenteMaiorQueDois();
+		}
+		return duracaoHoras;
+	}
+
+	private int calcularDuracaoHoraTerminoIgualInicioMaisUm() {
+		if (minutosTerminoMenorQueInicio)  // Não chegou a uma hora
+			duracaoHoras = 0;
+		else // Durou pelo menos uma hora
+			duracaoHoras = 1;
+		return duracaoHoras;
+	}
+
+	private int calcularDuracaoHoraPossivelmenteMaiorQueDois() {
+		if (horaTerminoMenosInicio > 2)
+			duracaoHoras = horaTerminoMenosInicio;
+		else if (horaTerminoMenosInicio == 2 && // Certamente menos de duas horas 
+				minutosTerminoMenorQueInicio)   // e mais de uma hora
+			duracaoHoras = 1;
+		else // Duração de duas horas, certamente
+			duracaoHoras = 2;
 		return duracaoHoras;
 	}
 }
